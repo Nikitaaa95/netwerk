@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const { initDb } = require('./db');
 const authRouter = require('./routes/auth');
 const contactsRouter = require('./routes/contacts');
 const touchpointsRouter = require('./routes/touchpoints');
@@ -18,6 +19,11 @@ app.use('/api/auth', authRouter);
 app.use('/api/contacts', authMiddleware, contactsRouter);
 app.use('/api/contacts/:contactId/touchpoints', authMiddleware, touchpointsRouter);
 
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
-});
+initDb()
+  .then(() => {
+    app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
+  })
+  .catch(err => {
+    console.error('Failed to initialize database:', err);
+    process.exit(1);
+  });
